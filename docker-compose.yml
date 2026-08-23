@@ -1,0 +1,206 @@
+services:
+
+  # ============================================================
+  # Edge
+  # ============================================================
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${NGINX_HTTP_PORT}:80"
+      - "${NGINX_HTTPS_PORT}:443"
+    networks:
+      - sentinel_frontend
+      - sentinel_backend
+    volumes:
+      - sentinel_nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD-SHELL", "nginx -t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  # ============================================================
+  # Application
+  # ============================================================
+
+  frontend:
+    image: node:22-alpine
+    restart: unless-stopped
+    working_dir: /app
+    command: ["sh", "-c", "sleep infinity"]
+    networks:
+      - sentinel_frontend
+      - sentinel_backend
+
+
+  backend:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-m", "http.server", "8000"]
+    networks:
+      - sentinel_backend
+      - sentinel_internal
+      - sentinel_data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  # ============================================================
+  # Security Processing
+  # ============================================================
+
+  collector:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-c", "import time; time.sleep(3600)"]
+    networks:
+      - sentinel_internal
+    volumes:
+      - sentinel_nginx_logs:/var/log/nginx:ro
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'print(\"collector ok\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  detector:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-c", "import time; time.sleep(3600)"]
+    networks:
+      - sentinel_internal
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'print(\"detector ok\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  policy-engine:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-c", "import time; time.sleep(3600)"]
+    networks:
+      - sentinel_internal
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'print(\"policy-engine ok\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  response-manager:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-c", "import time; time.sleep(3600)"]
+    networks:
+      - sentinel_internal
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'print(\"response-manager ok\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  scheduler:
+    image: python:3.12-slim
+    restart: unless-stopped
+    working_dir: /app
+    command: ["python", "-c", "import time; time.sleep(3600)"]
+    networks:
+      - sentinel_internal
+      - sentinel_data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'print(\"scheduler ok\")'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
+  # ============================================================
+  # Data
+  # ============================================================
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - sentinel_data
+    volumes:
+      - sentinel_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - sentinel_data
+    volumes:
+      - sentinel_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+# ==============================================================
+# Networks
+# ==============================================================
+
+networks:
+
+  sentinel_frontend:
+    driver: bridge
+
+  sentinel_backend:
+    driver: bridge
+
+  sentinel_internal:
+    driver: bridge
+    internal: true
+
+  sentinel_data:
+    driver: bridge
+    internal: true
+
+
+# ==============================================================
+# Volumes
+# ==============================================================
+
+volumes:
+
+  sentinel_postgres_data:
+    driver: local
+
+  sentinel_redis_data:
+    driver: local
+
+  sentinel_nginx_logs:
+    driver: local
