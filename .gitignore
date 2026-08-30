@@ -34,3 +34,8 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+
+# Database Backups
+backup/database/*.dump
+backup/database/*.sql
+backup/database/*.backup
