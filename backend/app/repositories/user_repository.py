@@ -73,6 +73,37 @@ class UserRepository:
 
         return user
 
+    async def update(
+        self,
+        user: User,
+    ) -> User:
+        await self.session.flush()
+        await self.session.refresh(user)
+
+        return user
+
+    async def disable(
+        self,
+        user: User,
+    ) -> User:
+        user.status = "DISABLED"
+
+        await self.session.flush()
+        await self.session.refresh(user)
+
+        return user
+
+    async def enable(
+        self,
+        user: User,
+    ) -> User:
+        user.status = "ACTIVE"
+
+        await self.session.flush()
+        await self.session.refresh(user)
+
+        return user
+
     async def update_last_login(
         self,
         user: User,
@@ -80,3 +111,14 @@ class UserRepository:
         user.last_login_at = datetime.now(timezone.utc)
 
         await self.session.flush()
+    
+    async def get_all(self) -> list[User]:
+        result = await self.session.execute(
+            select(User)
+            .options(
+                selectinload(User.role)
+            )
+            .order_by(User.created_at.desc())
+        )
+
+        return list(result.scalars().all())
