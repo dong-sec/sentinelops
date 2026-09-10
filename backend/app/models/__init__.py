@@ -5,6 +5,7 @@ from app.models.response import Response, ResponseStep
 from app.models.role import Role
 from app.models.role_permission import role_permissions
 from app.models.user import User
+from app.models.audit import AuditLog
 
 __all__ = [
     "Base",
@@ -16,4 +17,5 @@ __all__ = [
     "Role",
     "User",
     "role_permissions",
+    "AuditLog",
 ]

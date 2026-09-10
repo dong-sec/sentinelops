@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.repositories.response_repository import ResponseRepository
+from app.repositories.audit_repository import AuditRepository
 from app.schemas.response import (
     ResponseDetailResponse,
     ResponseExecuteRequest,
@@ -22,7 +23,12 @@ def get_response_service(
     session: AsyncSession = Depends(get_db),
 ) -> ResponseService:
     repository = ResponseRepository(session)
-    return ResponseService(repository)
+    audit_repository = AuditRepository(session)
+
+    return ResponseService(
+        repository,
+        audit_repository,
+    )
 
 
 @router.get(

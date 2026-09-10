@@ -1,13 +1,20 @@
 from uuid import UUID
 
+from app.models.audit import AuditLog
 from app.models.response import Response, ResponseStep
+from app.repositories.audit_repository import AuditRepository
 from app.repositories.response_repository import ResponseRepository
 
 
 class ResponseService:
 
-    def __init__(self, repository: ResponseRepository):
+    def __init__(
+        self,
+        repository: ResponseRepository,
+        audit_repository: AuditRepository,
+    ):
         self.repository = repository
+        self.audit_repository = audit_repository
 
     async def get_all(self) -> list[Response]:
         return await self.repository.get_all()
@@ -52,6 +59,25 @@ class ResponseService:
         )
 
         await self.repository.create_step(step)
+
+        audit_log = AuditLog(
+            actor_user_id=user_id,
+            action="RESPONSE_EXECUTE",
+            target_type="response",
+            target_id=response.id,
+            result="PENDING",
+            reason=reason,
+            after_data={
+                "response_type": action,
+                "target": target_value,
+                "duration_seconds": duration_seconds,
+                "source_event_id": str(source_event_id)
+                if source_event_id
+                else None,
+            },
+        )
+
+        await self.audit_repository.create(audit_log)
 
         await self.repository.session.commit()
 
