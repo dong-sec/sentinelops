@@ -1,22 +1,26 @@
 import { useEffect, useState } from 'react'
-import { getDashboardOverview } from '../../services/dashboard'
+import { getDashboardOverview, getDashboardTrends } from '../../services/dashboard'
 import DashboardKpi from './components/DashboardKpi'
 import RiskDistribution from './components/RiskDistribution'
 import AttackDistribution from './components/AttackDistribution'
 import RecentCriticalEvents from './components/RecentCriticalEvents'
 import RecentResponses from './components/RecentResponses'
+import DashboardTrend from './components/DashboardTrend'
 import './dashboard.css'
 
 function Dashboard() {
   const [data, setData] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
+  const [trend, setTrend] = useState(null)
 
   useEffect(() => {
     async function loadDashboard() {
       try {
         const response = await getDashboardOverview()
         setData(response ?? null)
+        const trendResponse = await getDashboardTrends('24h')
+        setTrend(trendResponse)
       } catch (err) {
         setError(err.message || 'Failed to load dashboard')
       } finally {
@@ -64,6 +68,7 @@ function Dashboard() {
       </header>
 
       <DashboardKpi kpi={data.kpi} />
+      <DashboardTrend trend={trend} />
 
       <div className="dashboard-grid dashboard-grid-two">
         <AttackDistribution
