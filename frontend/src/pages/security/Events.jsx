@@ -3,6 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { getEvents } from '../../services/events'
 import './security.css'
 
+const DEFAULT_FILTERS = {
+  severity: '',
+  risk_level: '',
+  attack_type: '',
+  source_ip: '',
+  status: '',
+  method: '',
+  from: '',
+  to: '',
+  sort_by: 'event_time',
+  sort_order: 'desc',
+}
+
 function formatTimestamp(timestamp) {
   if (!timestamp) return '-'
 
@@ -27,10 +40,13 @@ function Events() {
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
 
+  const [filters, setFilters] = useState(DEFAULT_FILTERS)
+  const [appliedFilters, setAppliedFilters] = useState(DEFAULT_FILTERS)
+
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
-  async function loadEvents(targetPage = page) {
+  async function loadEvents(targetPage = page, targetFilters = appliedFilters) {
     try {
       setIsLoading(true)
       setError('')
@@ -38,8 +54,7 @@ function Events() {
       const response = await getEvents({
         page: targetPage,
         page_size: pageSize,
-        sort_by: 'event_time',
-        sort_order: 'desc',
+        ...targetFilters,
       })
 
       setEvents(Array.isArray(response?.items) ? response.items : [])
@@ -54,8 +69,49 @@ function Events() {
   }
 
   useEffect(() => {
-    loadEvents(1)
+    loadEvents(1, DEFAULT_FILTERS)
   }, [])
+
+  function handleFilterChange(event) {
+    const { name, value } = event.target
+
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }))
+  }
+
+  function handleApplyFilters(event) {
+    event.preventDefault()
+
+    const nextFilters = { ...filters }
+
+    setAppliedFilters(nextFilters)
+    loadEvents(1, nextFilters)
+  }
+
+  function handleResetFilters() {
+    setFilters(DEFAULT_FILTERS)
+    setAppliedFilters(DEFAULT_FILTERS)
+    loadEvents(1, DEFAULT_FILTERS)
+  }
+
+  function handleSortChange(event) {
+    const { name, value } = event.target
+
+    const nextFilters = {
+      ...appliedFilters,
+      [name]: value,
+    }
+
+    setFilters((current) => ({
+      ...current,
+      [name]: value,
+    }))
+
+    setAppliedFilters(nextFilters)
+    loadEvents(1, nextFilters)
+  }
 
   function handlePageChange(nextPage) {
     if (
@@ -121,6 +177,160 @@ function Events() {
             </span>
           )}
         </div>
+
+        <form className="security-filter-form" onSubmit={handleApplyFilters}>
+          <div className="security-filter-grid">
+            <label>
+              <span>Severity</span>
+              <select
+                name="severity"
+                value={filters.severity}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Risk Level</span>
+              <select
+                name="risk_level"
+                value={filters.risk_level}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                <option value="CRITICAL">CRITICAL</option>
+                <option value="HIGH">HIGH</option>
+                <option value="MEDIUM">MEDIUM</option>
+                <option value="LOW">LOW</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Attack Type</span>
+              <input
+                type="text"
+                name="attack_type"
+                value={filters.attack_type}
+                onChange={handleFilterChange}
+                placeholder="SQL_INJECTION"
+              />
+            </label>
+
+            <label>
+              <span>Source IP</span>
+              <input
+                type="text"
+                name="source_ip"
+                value={filters.source_ip}
+                onChange={handleFilterChange}
+                placeholder="192.168.1.100"
+              />
+            </label>
+
+            <label>
+              <span>HTTP Method</span>
+              <select
+                name="method"
+                value={filters.method}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+                <option value="PATCH">PATCH</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Status</span>
+              <select
+                name="status"
+                value={filters.status}
+                onChange={handleFilterChange}
+              >
+                <option value="">All</option>
+                <option value="DETECTED">DETECTED</option>
+                <option value="BLOCKED">BLOCKED</option>
+                <option value="RESOLVED">RESOLVED</option>
+              </select>
+            </label>
+
+            <label>
+              <span>From</span>
+              <input
+                type="datetime-local"
+                name="from"
+                value={filters.from}
+                onChange={handleFilterChange}
+              />
+            </label>
+
+            <label>
+              <span>To</span>
+              <input
+                type="datetime-local"
+                name="to"
+                value={filters.to}
+                onChange={handleFilterChange}
+              />
+            </label>
+          </div>
+
+          <div className="security-filter-actions">
+            <div className="security-filter-sort">
+              <label>
+                <span>Sort By</span>
+                <select
+                  name="sort_by"
+                  value={filters.sort_by}
+                  onChange={handleSortChange}
+                >
+                  <option value="event_time">Time</option>
+                  <option value="risk_score">Risk Score</option>
+                  <option value="severity">Severity</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Order</span>
+                <select
+                  name="sort_order"
+                  value={filters.sort_order}
+                  onChange={handleSortChange}
+                >
+                  <option value="desc">Descending</option>
+                  <option value="asc">Ascending</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="security-filter-buttons">
+              <button
+                type="button"
+                className="security-secondary-button"
+                onClick={handleResetFilters}
+                disabled={isLoading}
+              >
+                Reset
+              </button>
+
+              <button
+                type="submit"
+                className="security-primary-button"
+                disabled={isLoading}
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </form>
 
         {error && (
           <div className="security-inline-error" role="alert">

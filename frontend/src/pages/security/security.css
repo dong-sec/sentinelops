@@ -513,3 +513,137 @@
     justify-content: space-between;
   }
 }
+
+.security-filter-form {
+  padding: 16px;
+  border-bottom: 1px solid #1f2937;
+  background: #111827;
+}
+
+.security-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.security-filter-grid label,
+.security-filter-sort label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.security-filter-grid label span,
+.security-filter-sort label span {
+  color: #9ca3af;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.security-filter-grid input,
+.security-filter-grid select,
+.security-filter-sort select {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid #374151;
+  border-radius: 5px;
+  outline: none;
+  background: #0f172a;
+  color: #d1d5db;
+  font-size: 11px;
+}
+
+.security-filter-grid input:focus,
+.security-filter-grid select:focus,
+.security-filter-sort select:focus {
+  border-color: #6b7280;
+}
+
+.security-filter-actions {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.security-filter-sort {
+  display: flex;
+  gap: 10px;
+}
+
+.security-filter-sort label {
+  width: 150px;
+}
+
+.security-filter-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.security-primary-button,
+.security-secondary-button {
+  min-height: 32px;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.security-primary-button {
+  border: 1px solid #4b5563;
+  background: #1f2937;
+  color: #f3f4f6;
+}
+
+.security-primary-button:hover:not(:disabled) {
+  border-color: #6b7280;
+  background: #374151;
+}
+
+.security-secondary-button {
+  border: 1px solid #374151;
+  background: #0f172a;
+  color: #d1d5db;
+}
+
+.security-secondary-button:hover:not(:disabled) {
+  border-color: #6b7280;
+  color: #ffffff;
+}
+
+.security-primary-button:disabled,
+.security-secondary-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+@media (max-width: 1000px) {
+  .security-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .security-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .security-filter-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .security-filter-sort {
+    flex-direction: column;
+  }
+
+  .security-filter-sort label {
+    width: 100%;
+  }
+
+  .security-filter-buttons {
+    justify-content: flex-end;
+  }
+}
