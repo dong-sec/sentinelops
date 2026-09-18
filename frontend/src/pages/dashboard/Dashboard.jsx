@@ -13,14 +13,34 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
   const [trend, setTrend] = useState(null)
+  const [selectedRange, setSelectedRange] = useState('24h')
+  const [isTrendLoading, setIsTrendLoading] = useState(false)
+
+  async function loadTrend(range) {
+    try {
+      setIsTrendLoading(true)
+
+      const response = await getDashboardTrends(range)
+      setTrend(response ?? null)
+    } catch (err) {
+      setError(err.message || 'Failed to load dashboard trend')
+    } finally {
+      setIsTrendLoading(false)
+    }
+  }
+
+  function handleTrendRangeChange(range) {
+    setSelectedRange(range)
+    loadTrend(range)
+  }
 
   useEffect(() => {
     async function loadDashboard() {
       try {
         const response = await getDashboardOverview()
         setData(response ?? null)
-        const trendResponse = await getDashboardTrends('24h')
-        setTrend(trendResponse)
+
+        await loadTrend('24h')
       } catch (err) {
         setError(err.message || 'Failed to load dashboard')
       } finally {
@@ -68,7 +88,13 @@ function Dashboard() {
       </header>
 
       <DashboardKpi kpi={data.kpi} />
-      <DashboardTrend trend={trend} />
+
+      <DashboardTrend
+        trend={trend}
+        selectedRange={selectedRange}
+        onRangeChange={handleTrendRangeChange}
+        isLoading={isTrendLoading}
+      />
 
       <div className="dashboard-grid dashboard-grid-two">
         <AttackDistribution
