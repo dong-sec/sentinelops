@@ -7,6 +7,7 @@ import Dashboard from '../pages/dashboard/Dashboard'
 import AttackMonitor from '../pages/security/AttackMonitor'
 import EventDetail from '../pages/security/EventDetail'
 import Events from '../pages/security/Events'
+import Search from '../pages/security/Search'
 
 function Placeholder({ title }) {
   return (
@@ -55,7 +56,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'security/search',
-            element: <Placeholder title="Search" />,
+            element: <Search />,
           },
           {
             path: 'security/ip/:ip',
