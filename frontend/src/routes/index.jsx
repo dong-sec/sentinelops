@@ -6,6 +6,7 @@ import PublicRoute from './PublicRoute'
 import Dashboard from '../pages/dashboard/Dashboard'
 import AttackMonitor from '../pages/security/AttackMonitor'
 import EventDetail from '../pages/security/EventDetail'
+import Events from '../pages/security/Events'
 
 function Placeholder({ title }) {
   return (
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'security/events',
-            element: <Placeholder title="Events" />,
+            element: <Events />,
           },
           {
             path: 'security/events/:eventId',
