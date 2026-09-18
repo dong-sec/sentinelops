@@ -5,6 +5,7 @@ import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
 import Dashboard from '../pages/dashboard/Dashboard'
 import AttackMonitor from '../pages/security/AttackMonitor'
+import EventDetail from '../pages/security/EventDetail'
 
 function Placeholder({ title }) {
   return (
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'security/events/:eventId',
-            element: <Placeholder title="Event Detail" />,
+            element: <EventDetail />,
           },
           {
             path: 'security/search',
