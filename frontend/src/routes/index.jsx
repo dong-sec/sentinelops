@@ -4,6 +4,7 @@ import Login from '../pages/auth/Login'
 import ProtectedRoute from './ProtectedRoute'
 import PublicRoute from './PublicRoute'
 import Dashboard from '../pages/dashboard/Dashboard'
+import AttackMonitor from '../pages/security/AttackMonitor'
 
 function Placeholder({ title }) {
   return (
@@ -40,7 +41,7 @@ const router = createBrowserRouter([
           },
           {
             path: 'security/monitor',
-            element: <Placeholder title="Attack Monitor" />,
+            element: <AttackMonitor />,
           },
           {
             path: 'security/events',
